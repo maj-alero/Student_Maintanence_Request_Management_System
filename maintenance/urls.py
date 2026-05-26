@@ -1,0 +1,32 @@
+from django.urls import path
+from .views import (
+    HomeView, DashboardView,
+    StudentDashboardView, StaffDashboardView, AdminDashboardView,
+    SubmitRequestView, RequestDetailView,
+    StatusUpdateView, RequestAssignView, PriorityOverrideView,
+    UserManagementView, ToggleUserActiveView,
+    TrendAnalysisView, NotificationsView,
+    RequestStatusJsonView,
+    CustomLoginView, register_view, custom_logout_view,
+)
+
+urlpatterns = [
+    path('',                                    HomeView.as_view(),              name='home'),
+    path('dashboard/',                          DashboardView.as_view(),         name='dashboard'),
+    path('dashboard/student/',                  StudentDashboardView.as_view(),  name='student_dashboard'),
+    path('dashboard/staff/',                    StaffDashboardView.as_view(),    name='staff_dashboard'),
+    path('dashboard/admin/',                    AdminDashboardView.as_view(),    name='admin_dashboard'),
+    path('request/new/',                        SubmitRequestView.as_view(),     name='submit_request'),
+    path('request/<int:pk>/',                   RequestDetailView.as_view(),     name='request_detail'),
+    path('request/<int:pk>/status/',            StatusUpdateView.as_view(),      name='status_update'),
+    path('request/<int:pk>/status.json',        RequestStatusJsonView.as_view(), name='request_status_json'),
+    path('request/<int:pk>/assign/',            RequestAssignView.as_view(),     name='request_assign'),
+    path('request/<int:pk>/override/',          PriorityOverrideView.as_view(),  name='priority_override'),
+    path('users/',                              UserManagementView.as_view(),    name='user_management'),
+    path('users/<int:pk>/toggle/',              ToggleUserActiveView.as_view(),  name='toggle_user_active'),
+    path('analytics/',                          TrendAnalysisView.as_view(),     name='trend_analysis'),
+    path('notifications/',                      NotificationsView.as_view(),     name='notifications'),
+    path('login/',                              CustomLoginView.as_view(),       name='login'),
+    path('register/',                           register_view,                   name='register'),
+    path('logout/',                             custom_logout_view,              name='logout'),
+]

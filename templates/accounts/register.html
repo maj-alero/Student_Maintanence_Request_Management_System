@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Create account{% endblock %}
+
+{% block auth_content %}
+<div class="auth-wrap">
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            <div class="auth-logo-icon"><i class="ti ti-tool"></i></div>
+            <span class="auth-logo-text">FixIt — SMRMS</span>
+        </div>
+
+        <h1 class="auth-heading">Create your account</h1>
+        <p class="auth-sub">Choose your role and fill in the details below.</p>
+
+        <!-- Role selector -->
+        <div class="role-tabs">
+            <button type="button" class="role-tab {% if role_type != 'Staff' %}active{% endif %}"
+                    data-role="Student" onclick="switchRole('Student')">
+                <i class="ti ti-school"></i> Student
+            </button>
+            <button type="button" class="role-tab {% if role_type == 'Staff' %}active{% endif %}"
+                    data-role="Staff" onclick="switchRole('Staff')">
+                <i class="ti ti-tool"></i> Staff
+            </button>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <i class="ti ti-alert-circle"></i>
+            Please fix the errors below before continuing.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="role_type" id="role_type_input"
+                   value="{{ role_type|default:'Student' }}">
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                <input class="form-control" type="text" name="username"
+                       id="{{ form.username.id_for_label }}"
+                       placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required>
+                {% if form.username.errors %}
+                <span class="form-help" style="color:var(--hi);">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.email.id_for_label }}">Email (optional)</label>
+                <input class="form-control" type="email" name="email"
+                       id="{{ form.email.id_for_label }}"
+                       placeholder="your@email.com" value="{{ form.email.value|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.password1.id_for_label }}">Password</label>
+                <input class="form-control" type="password" name="password1"
+                       id="{{ form.password1.id_for_label }}"
+                       placeholder="Create a password" required>
+                {% if form.password1.errors %}
+                <span class="form-help" style="color:var(--hi);">{{ form.password1.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.password2.id_for_label }}">Confirm password</label>
+                <input class="form-control" type="password" name="password2"
+                       id="{{ form.password2.id_for_label }}"
+                       placeholder="Repeat your password" required>
+                {% if form.password2.errors %}
+                <span class="form-help" style="color:var(--hi);">{{ form.password2.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">
+                <i class="ti ti-user-plus"></i> Create account
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Already have an account? <a href="{% url 'login' %}">Sign in</a>
+        </p>
+    </div>
+</div>
+{% endblock auth_content %}

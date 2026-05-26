@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block auth_content %}
+<div style="min-height:100vh;flex:1;display:flex;align-items:center;justify-content:center;
+            flex-direction:column;text-align:center;padding:40px 24px;
+            background:var(--bg-base);">
+
+    <div style="width:56px;height:56px;background:var(--accent);border-radius:14px;
+                display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <i class="ti ti-tool" style="font-size:28px;color:#fff;"></i>
+    </div>
+
+    <h1 style="font-family:var(--font-display);font-size:28px;font-weight:600;
+               color:var(--t-primary);margin-bottom:10px;">
+        Hostel Maintenance Request System
+    </h1>
+    <p style="font-size:15px;color:var(--t-secondary);max-width:460px;line-height:1.6;margin-bottom:32px;">
+        Report and track hostel facility issues. Our AI automatically prioritises your
+        request so the most urgent problems get fixed first.
+    </p>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <a href="{% url 'login' %}" class="btn btn-primary">
+            <i class="ti ti-login"></i> Sign in
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-outline">
+            <i class="ti ti-user-plus"></i> Create account
+        </a>
+    </div>
+
+    <div style="margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);
+                gap:16px;max-width:640px;width:100%;">
+        <div class="card" style="text-align:left;">
+            <i class="ti ti-bolt" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">AI Prioritisation</div>
+            <div style="font-size:12.5px;color:var(--t-secondary);">Machine learning ranks every request by urgency automatically.</div>
+        </div>
+        <div class="card" style="text-align:left;">
+            <i class="ti ti-eye" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">Live tracking</div>
+            <div style="font-size:12.5px;color:var(--t-secondary);">Follow your request from submission to resolution in real time.</div>
+        </div>
+        <div class="card" style="text-align:left;">
+            <i class="ti ti-chart-bar" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
+            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">Analytics</div>
+            <div style="font-size:12.5px;color:var(--t-secondary);">Admins see trends, hotspots, and predictive insights.</div>
+        </div>
+    </div>
+</div>
+{% endblock auth_content %}

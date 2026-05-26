@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}New Request{% endblock %}
+{% block page_title %}Submit a new request{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Report a maintenance issue</h1>
+    <p>Fill in the details below. Our AI will automatically assign a priority level.</p>
+</div>
+
+<div>
+    <div class="card">
+        <div class="card-title">
+            <i class="ti ti-clipboard-plus" style="color:var(--accent);"></i>
+            Request details
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Location section -->
+            <div class="card-title" style="font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--t-secondary);margin-bottom:12px;padding:0;">
+                <i class="ti ti-map-pin"></i> Room location
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 16px;">
+
+                <div class="form-group" style="grid-column:1/3;">
+                    <label class="form-label" for="{{ form.hostel_name.id_for_label }}">
+                        Hostel name <span style="color:var(--hi);">*</span>
+                    </label>
+                    <select class="form-select" name="hostel_name" id="{{ form.hostel_name.id_for_label }}" required>
+                        <option value="">Select hostel…</option>
+                        {% for val, label in form.fields.hostel_name.choices %}
+                            {% if val %}
+                            <option value="{{ val }}" {% if form.hostel_name.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.hostel_name.errors %}<span class="form-help" style="color:var(--hi);">{{ form.hostel_name.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.wing.id_for_label }}">
+                        Wing <span style="color:var(--hi);">*</span>
+                    </label>
+                    <select class="form-select" name="wing" id="{{ form.wing.id_for_label }}" required>
+                        {% for val, label in form.fields.wing.choices %}
+                        <option value="{{ val }}" {% if form.wing.value == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.wing.errors %}<span class="form-help" style="color:var(--hi);">{{ form.wing.errors.0 }}</span>{% endif %}
+                </div>
+
+            </div>
+
+            <div class="form-group" style="max-width:160px;">
+                <label class="form-label" for="{{ form.room_number.id_for_label }}">
+                    Room number <span style="color:var(--hi);">*</span>
+                </label>
+                <input class="form-control" type="text" name="room_number"
+                       id="{{ form.room_number.id_for_label }}"
+                       placeholder="e.g. 204"
+                       value="{{ form.room_number.value|default:'' }}" required>
+                {% if form.room_number.errors %}<span class="form-help" style="color:var(--hi);">{{ form.room_number.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div style="height:1px;background:var(--border);margin:4px 0 18px;"></div>
+
+            <!-- Issue section -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.category.id_for_label }}">
+                        Category <span style="color:var(--hi);">*</span>
+                    </label>
+                    <select class="form-select" name="category" id="{{ form.category.id_for_label }}" required>
+                        <option value="">Select category…</option>
+                        {% for val, label in form.fields.category.choices %}
+                            {% if val %}
+                            <option value="{{ val }}" {% if form.category.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.category.errors %}<span class="form-help" style="color:var(--hi);">{{ form.category.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.location.id_for_label }}">
+                        Location <span style="color:var(--hi);">*</span>
+                    </label>
+                    <select class="form-select" name="location" id="{{ form.location.id_for_label }}" required>
+                        <option value="">Select location…</option>
+                        {% for val, label in form.fields.location.choices %}
+                            {% if val %}
+                            <option value="{{ val }}" {% if form.location.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.location.errors %}<span class="form-help" style="color:var(--hi);">{{ form.location.errors.0 }}</span>{% endif %}
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.description.id_for_label }}">
+                    Description <span style="color:var(--hi);">*</span>
+                </label>
+                <textarea class="form-control" name="description"
+                          id="{{ form.description.id_for_label }}"
+                          placeholder="Describe the issue in detail…" rows="4" required>{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}<span class="form-help" style="color:var(--hi);">{{ form.description.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.photo.id_for_label }}">
+                    Photo of damage <span style="color:var(--t-muted);font-weight:400;">(optional)</span>
+                </label>
+                <input class="form-control" type="file" name="photo"
+                       id="{{ form.photo.id_for_label }}"
+                       accept="image/*">
+                <span class="form-help">Attach a photo to help staff understand the issue faster.</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.urgency_level.id_for_label }}">
+                        Urgency level (1 = low, 5 = critical)
+                    </label>
+                    <select class="form-select" name="urgency_level" id="{{ form.urgency_level.id_for_label }}" required>
+                        {% for val, label in form.fields.urgency_level.choices %}
+                        <option value="{{ val }}" {% if form.urgency_level.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.affected_users.id_for_label }}">
+                        Number of people affected
+                    </label>
+                    <input class="form-control" type="number" min="1" max="100"
+                           name="affected_users" id="{{ form.affected_users.id_for_label }}"
+                           placeholder="e.g. 3"
+                           value="{{ form.affected_users.value|default:'' }}" required>
+                    {% if form.affected_users.errors %}<span class="form-help" style="color:var(--hi);">{{ form.affected_users.errors.0 }}</span>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.impact_level.id_for_label }}">
+                        Impact level
+                    </label>
+                    <select class="form-select" name="impact_level" id="{{ form.impact_level.id_for_label }}" required>
+                        {% for val, label in form.fields.impact_level.choices %}
+                        <option value="{{ val }}" {% if form.impact_level.value == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.recurrence.id_for_label }}">
+                        Has this happened before?
+                    </label>
+                    <select class="form-select" name="recurrence" id="{{ form.recurrence.id_for_label }}" required>
+                        {% for val, label in form.fields.recurrence.choices %}
+                        <option value="{{ val }}" {% if form.recurrence.value == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" name="time_sensitivity"
+                           id="{{ form.time_sensitivity.id_for_label }}"
+                           {% if form.time_sensitivity.value %}checked{% endif %}>
+                    <label for="{{ form.time_sensitivity.id_for_label }}">
+                        This issue is time-sensitive and needs urgent attention
+                    </label>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:8px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-send"></i> Submit request
+                </button>
+                <a href="{% url 'student_dashboard' %}" class="btn btn-outline">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="alert alert-info" style="margin-top:0;">
+        <i class="ti ti-robot"></i>
+        Once submitted, our AI model will automatically classify the priority of your request
+        as <strong>High</strong>, <strong>Medium</strong>, or <strong>Low</strong>.
+    </div>
+</div>
+{% endblock %}

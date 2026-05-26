@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Work Queue{% endblock %}
+{% block page_title %}Work queue{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Work queue</h1>
+    <p>Requests assigned to you, sorted by priority.</p>
+</div>
+
+{% if requests %}
+<div class="table-wrap">
+    <table class="dt">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td class="text-muted text-xs">{{ req.id }}</td>
+                <td class="fw-500">{{ req.category }}</td>
+                <td>{{ req.location }}</td>
+                <td class="text-sm" style="max-width:200px;">
+                    {{ req.description|truncatechars:60 }}
+                </td>
+                <td>
+                    {% if req.priority %}
+                        {% if req.priority.priority_label == 'High' %}
+                            <span class="badge badge-high">High</span>
+                        {% elif req.priority.priority_label == 'Medium' %}
+                            <span class="badge badge-medium">Medium</span>
+                        {% else %}
+                            <span class="badge badge-low">Low</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted text-xs">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.status == 'Pending' %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% elif req.status == 'In Progress' %}
+                        <span class="badge badge-inprogress">In Progress</span>
+                    {% else %}
+                        <span class="badge badge-resolved">Resolved</span>
+                    {% endif %}
+                </td>
+                <td class="text-xs text-muted">{{ req.timestamp|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">
+                        View
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="ti ti-circle-check"></i>
+        <h3>All caught up</h3>
+        <p>There are no requests assigned to you right now.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

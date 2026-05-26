@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SMRMS{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Sora:wght@500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+
+    <!-- Project CSS -->
+    <link rel="stylesheet" href="{% static 'smrms/css/smrms.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+
+    <!-- Mobile sidebar overlay -->
+    <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar" id="sidebar">
+
+        <a href="{% url 'home' %}" class="sb-logo">
+            <div class="sb-logo-icon"><i class="ti ti-tool"></i></div>
+            <span class="sb-logo-text">Fix<span>It</span></span>
+        </a>
+
+        <div class="sb-divider"></div>
+
+        <nav class="sb-nav">
+            <div class="sb-section-label">Navigation</div>
+
+            <a href="{% url 'dashboard' %}"
+               {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+                <i class="ti ti-layout-dashboard"></i> Dashboard
+            </a>
+
+            {% if user.role == 'Student' %}
+                <a href="{% url 'submit_request' %}"
+                   {% if request.resolver_match.url_name == 'submit_request' %}class="active"{% endif %}>
+                    <i class="ti ti-plus"></i> New request
+                </a>
+                <a href="{% url 'student_dashboard' %}"
+                   {% if request.resolver_match.url_name == 'student_dashboard' %}class="active"{% endif %}>
+                    <i class="ti ti-list"></i> My requests
+                </a>
+            {% endif %}
+
+            {% if user.role == 'Staff' %}
+                <a href="{% url 'staff_dashboard' %}"
+                   {% if request.resolver_match.url_name == 'staff_dashboard' %}class="active"{% endif %}>
+                    <i class="ti ti-clipboard-list"></i> Work queue
+                </a>
+            {% endif %}
+
+            {% if user.role == 'Admin' or user.is_superuser %}
+                <div class="sb-divider"></div>
+                <div class="sb-section-label">Admin tools</div>
+
+                <a href="{% url 'admin_dashboard' %}"
+                   {% if request.resolver_match.url_name == 'admin_dashboard' %}class="active"{% endif %}>
+                    <i class="ti ti-layout-dashboard"></i> Overview
+                </a>
+                <a href="{% url 'user_management' %}"
+                   {% if request.resolver_match.url_name == 'user_management' %}class="active"{% endif %}>
+                    <i class="ti ti-users"></i> Users
+                </a>
+                <a href="{% url 'trend_analysis' %}"
+                   {% if request.resolver_match.url_name == 'trend_analysis' %}class="active"{% endif %}>
+                    <i class="ti ti-chart-bar"></i> Analytics
+                </a>
+            {% endif %}
+
+            <!-- Notifications (all roles) -->
+            <div class="sb-divider"></div>
+            <a href="{% url 'notifications' %}"
+               {% if request.resolver_match.url_name == 'notifications' %}class="active"{% endif %}>
+                <i class="ti ti-bell"></i> Notifications
+                {% if unread_count %}
+                    <span class="badge badge-accent" style="margin-left:auto;padding:1px 6px;font-size:10px;">{{ unread_count }}</span>
+                {% endif %}
+            </a>
+        </nav>
+
+        <div class="sb-bottom">
+            <div class="sb-user">
+                <div class="sb-avatar">{{ user.username|slice:":1"|upper }}</div>
+                <div>
+                    <div class="sb-uname">{{ user.username }}</div>
+                    <div class="sb-urole">{{ user.role }}</div>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="sb-logout">
+                <i class="ti ti-logout"></i> Sign out
+            </a>
+        </div>
+    </aside>
+
+    <!-- ── MAIN WRAP ── -->
+    <div class="main-wrap">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" onclick="openSb()" aria-label="Open menu">
+                    <i class="ti ti-menu-2"></i>
+                </button>
+                <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+            </div>
+            <div class="topbar-right">
+                <!-- Notification bell -->
+                <a href="{% url 'notifications' %}" class="btn-icon notif-wrap" title="Notifications">
+                    <i class="ti ti-bell"></i>
+                    {% if unread_count %}<span class="notif-badge">{{ unread_count }}</span>{% endif %}
+                </a>
+                <!-- Theme toggle -->
+                <button class="btn-icon" onclick="toggleTheme()" title="Toggle dark / light mode">
+                    <i class="ti ti-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Django messages -->
+        {% if messages %}
+        <div style="padding:14px 24px 0;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}" data-autohide>
+                <i class="ti ti-{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}circle-check{% elif message.tags == 'warning' %}alert-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="page-body">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div><!-- /.main-wrap -->
+
+{% else %}
+
+    <!-- Auth pages — no sidebar, floating theme toggle -->
+    <div style="position:fixed;top:14px;right:16px;z-index:300;">
+        <button class="btn-icon"
+                onclick="toggleTheme()"
+                style="background:var(--bg-surface);border:1px solid var(--border);">
+            <i class="ti ti-moon" id="themeIcon"></i>
+        </button>
+    </div>
+
+    {% block auth_content %}{% endblock %}
+
+{% endif %}
+
+<!-- Project JS (theme + sidebar) — must come AFTER the icon element exists -->
+<script src="{% static 'smrms/js/smrms.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

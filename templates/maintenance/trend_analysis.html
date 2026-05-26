@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Trend analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+.chart-container       { position: relative; height: 240px; }
+.chart-container-tall  { position: relative; height: 300px; }
+.insight-row { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.insight-row:last-child { border-bottom:none; }
+.insight-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:5px; }
+.recur-bar-wrap { flex:1; height:6px; background:var(--bg-base); border-radius:3px; overflow:hidden; }
+.recur-bar      { height:100%; border-radius:3px; background:var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Analytics &amp; trends</h1>
+    <p>System-wide insights to support predictive and preventive maintenance planning.</p>
+</div>
+
+<!-- ═══ SECTION 1: VOLUME & DISTRIBUTION ══════════════════════════════ -->
+<div style="margin-bottom:8px;font-family:var(--font-display);font-size:11px;text-transform:uppercase;
+            letter-spacing:.8px;color:var(--t-muted);">Volume &amp; distribution</div>
+
+<div class="card-grid mb-24">
+    <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar" style="color:var(--accent);"></i> Requests by category</div>
+        <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+    </div>
+    <div class="card">
+        <div class="card-title"><i class="ti ti-chart-pie" style="color:var(--accent);"></i> Priority distribution</div>
+        <div class="chart-container"><canvas id="priorityChart"></canvas></div>
+    </div>
+</div>
+
+<div class="card mb-24">
+    <div class="card-title"><i class="ti ti-chart-line" style="color:var(--accent);"></i> Request volume over time</div>
+    <div class="chart-container-tall"><canvas id="volumeChart"></canvas></div>
+</div>
+
+<!-- ═══ SECTION 2: LOCATION INTELLIGENCE ═════════════════════════════ -->
+<div style="margin-bottom:8px;font-family:var(--font-display);font-size:11px;text-transform:uppercase;
+            letter-spacing:.8px;color:var(--t-muted);">Location intelligence</div>
+
+<div class="card-grid mb-24">
+    <div class="card">
+        <div class="card-title"><i class="ti ti-building" style="color:var(--accent);"></i> Requests by hostel</div>
+        <div class="chart-container-tall"><canvas id="hostelChart"></canvas></div>
+    </div>
+    <div class="card">
+        <div class="card-title"><i class="ti ti-map-pin" style="color:var(--accent);"></i> Requests by wing</div>
+        <div class="chart-container-tall"><canvas id="wingChart"></canvas></div>
+    </div>
+</div>
+
+<!-- Hostel × Category hotspot table -->
+{% if hostel_category_hotspots %}
+<div class="card mb-24">
+    <div class="card-title">
+        <i class="ti ti-flame" style="color:var(--accent);"></i>
+        Hostel hotspots — issue type breakdown
+        <span style="margin-left:auto;font-size:11px;color:var(--t-muted);font-weight:400;">Top combinations by volume</span>
+    </div>
+    <div class="table-wrap" style="border:none;">
+        <table class="dt">
+            <thead>
+                <tr><th>Hostel</th><th>Issue type</th><th>Reports</th></tr>
+            </thead>
+            <tbody>
+                {% for row in hostel_category_hotspots %}
+                <tr>
+                    <td class="fw-500">{{ row.hostel_name }}</td>
+                    <td>{{ row.category }}</td>
+                    <td>
+                        <span class="badge badge-high" style="font-size:11px;">{{ row.count }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hostel × Wing hotspot table -->
+{% if hostel_wing_hotspots %}
+<div class="card mb-24">
+    <div class="card-title">
+        <i class="ti ti-door" style="color:var(--accent);"></i>
+        Most affected wings per hostel
+    </div>
+    <div class="table-wrap" style="border:none;">
+        <table class="dt">
+            <thead>
+                <tr><th>Hostel</th><th>Wing</th><th>Reports</th></tr>
+            </thead>
+            <tbody>
+                {% for row in hostel_wing_hotspots %}
+                <tr>
+                    <td class="fw-500">{{ row.hostel_name }}</td>
+                    <td>Wing {{ row.wing }}</td>
+                    <td><span class="badge badge-medium" style="font-size:11px;">{{ row.count }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ SECTION 3: ISSUE PATTERNS ════════════════════════════════════ -->
+<div style="margin-bottom:8px;font-family:var(--font-display);font-size:11px;text-transform:uppercase;
+            letter-spacing:.8px;color:var(--t-muted);">Issue patterns</div>
+
+<div class="card-grid mb-24">
+
+    <!-- Recurrence rate by category -->
+    <div class="card">
+        <div class="card-title"><i class="ti ti-refresh" style="color:var(--accent);"></i> Recurrence rate by category</div>
+        {% if recurrence_by_cat %}
+        {% for row in recurrence_by_cat %}
+        <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;">
+                <span style="font-weight:500;color:var(--t-primary);">{{ row.category }}</span>
+                <span style="color:var(--t-secondary);">{{ row.recurring_count }} / {{ row.total }} &nbsp;({{ row.rate }}%)</span>
+            </div>
+            <div class="recur-bar-wrap">
+                <div class="recur-bar" style="width:{{ row.rate }}%;
+                    {% if row.rate >= 60 %}background:#DC2626;
+                    {% elif row.rate >= 30 %}background:#D97706;
+                    {% else %}background:var(--accent);{% endif %}">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted text-sm">No data yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Avg resolution time by category -->
+    <div class="card">
+        <div class="card-title"><i class="ti ti-clock" style="color:var(--accent);"></i> Avg resolution time by category</div>
+        {% if avg_resolution %}
+        <div class="chart-container"><canvas id="avgResChart"></canvas></div>
+        {% else %}
+        <div class="empty-state" style="padding:24px 0;">
+            <i class="ti ti-clock-off"></i>
+            <h3>No resolved requests yet</h3>
+            <p>Resolution times will appear once requests are marked Resolved.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ═══ SECTION 4: PREDICTIVE ALERTS ════════════════════════════════ -->
+<div style="margin-bottom:8px;font-family:var(--font-display);font-size:11px;text-transform:uppercase;
+            letter-spacing:.8px;color:var(--t-muted);">Predictive alerts</div>
+
+<div class="card-grid mb-24">
+
+    <!-- Predictive insights panel -->
+    <div class="card">
+        <div class="card-title">
+            <i class="ti ti-bulb" style="color:var(--accent);"></i>
+            Emerging hotspots — last 30 days
+        </div>
+        {% if insights %}
+        {% for ins in insights %}
+        <div class="insight-row">
+            <div class="insight-dot" style="{% if ins.count >= 5 %}background:#DC2626;{% elif ins.count >= 3 %}background:#D97706;{% endif %}"></div>
+            <div>
+                <div style="font-size:13px;font-weight:500;color:var(--t-primary);">
+                    {{ ins.hostel_name }} — Wing {{ ins.wing }}
+                </div>
+                <div style="font-size:12px;color:var(--t-secondary);">
+                    {{ ins.category }}: <strong>{{ ins.count }} report{{ ins.count|pluralize }}</strong> in 30 days —
+                    {% if ins.count >= 5 %}
+                        <span style="color:#DC2626;">urgent preventive inspection recommended</span>
+                    {% elif ins.count >= 3 %}
+                        <span style="color:#D97706;">schedule a check-up</span>
+                    {% else %}
+                        monitor closely
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state" style="padding:20px 0;">
+            <i class="ti ti-circle-check" style="color:var(--lo);"></i>
+            <h3>No emerging hotspots</h3>
+            <p>No location has more than one report of the same issue in the last 30 days.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- High-priority backlog -->
+    <div class="card">
+        <div class="card-title">
+            <i class="ti ti-alert-triangle" style="color:#DC2626;"></i>
+            Unresolved high-priority requests
+        </div>
+        {% if high_priority_backlog %}
+        {% for req in high_priority_backlog %}
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:12.5px;font-weight:500;color:var(--t-primary);">
+                    #{{ req.id }} — {{ req.category }}
+                </div>
+                <div style="font-size:11.5px;color:var(--t-secondary);">
+                    {{ req.hostel_name }}{% if req.wing %}, Wing {{ req.wing }}{% endif %}{% if req.room_number %}, Rm {{ req.room_number }}{% endif %}
+                </div>
+                <div style="font-size:11px;color:var(--t-muted);margin-top:2px;">{{ req.timestamp|date:"d M Y" }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+                {% if req.status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+                {% else %}<span class="badge badge-inprogress">In Progress</span>{% endif %}
+                <a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">View</a>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state" style="padding:20px 0;">
+            <i class="ti ti-circle-check" style="color:var(--lo);"></i>
+            <h3>All clear</h3>
+            <p>No unresolved high-priority requests.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ═══ SECTION 5: RECURRING ISSUES TABLE ════════════════════════════ -->
+<div class="card">
+    <div class="card-title">
+        <i class="ti ti-repeat" style="color:var(--accent);"></i>
+        Recent recurring issues
+        <span style="margin-left:auto;font-size:11px;color:var(--t-muted);font-weight:400;">Reported as recurring by students</span>
+    </div>
+    {% if recurring_issues %}
+    <div class="table-wrap" style="border:none;">
+        <table class="dt">
+            <thead>
+                <tr>
+                    <th>#</th><th>Category</th><th>Hostel / Wing / Room</th>
+                    <th>Description</th><th>Priority</th><th>Status</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in recurring_issues %}
+                <tr>
+                    <td class="text-xs text-muted">{{ req.id }}</td>
+                    <td class="fw-500">{{ req.category }}</td>
+                    <td class="text-sm">
+                        {{ req.hostel_name }}<br>
+                        <span class="text-muted text-xs">Wing {{ req.wing }}, Rm {{ req.room_number }}</span>
+                    </td>
+                    <td class="text-sm">{{ req.description|truncatechars:55 }}</td>
+                    <td>
+                        {% if req.priority %}
+                            {% if req.priority.priority_label == 'High' %}<span class="badge badge-high">High</span>
+                            {% elif req.priority.priority_label == 'Medium' %}<span class="badge badge-medium">Medium</span>
+                            {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if req.status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+                        {% elif req.status == 'In Progress' %}<span class="badge badge-inprogress">In Progress</span>
+                        {% else %}<span class="badge badge-resolved">Resolved</span>{% endif %}
+                    </td>
+                    <td><a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:24px;">
+        <i class="ti ti-circle-check"></i>
+        <h3>No recurring issues flagged</h3>
+        <p>No repeated issues have been reported yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const chartData = {{ chart_data|safe }};
+
+function tv(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+Chart.defaults.color       = tv('--t-secondary') || '#5C5C7A';
+Chart.defaults.borderColor = tv('--border')      || 'rgba(0,0,0,0.08)';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size   = 12;
+
+const C1 = '#4F46E5', C2 = '#818CF8', C3 = '#A5B4FC',
+      C4 = '#06B6D4', C5 = '#10B981', C6 = '#F59E0B',
+      WARN = '#DC2626', PALETTE = [C1,C2,C3,C4,C5,C6,'#8B5CF6','#EC4899','#F97316','#14B8A6'];
+
+const barOpts = (color) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+});
+
+// 1. Category bar
+new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+        labels: chartData.categories.labels,
+        datasets: [{ label: 'Requests', data: chartData.categories.data,
+            backgroundColor: chartData.categories.labels.map((_,i) => PALETTE[i % PALETTE.length]),
+            borderRadius: 5 }]
+    },
+    options: barOpts()
+});
+
+// 2. Priority doughnut
+new Chart(document.getElementById('priorityChart'), {
+    type: 'doughnut',
+    data: {
+        labels: chartData.priority.labels,
+        datasets: [{ data: chartData.priority.data,
+            backgroundColor: ['#DC2626','#D97706','#059669'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+});
+
+// 3. Volume line
+new Chart(document.getElementById('volumeChart'), {
+    type: 'line',
+    data: {
+        labels: chartData.volume.labels,
+        datasets: [{ label: 'Requests', data: chartData.volume.data,
+            borderColor: C1, backgroundColor: 'rgba(79,70,229,0.08)',
+            fill: true, tension: 0.4, pointRadius: 3 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+
+// 4. Hostel horizontal bar
+if (chartData.hostels.labels.length) {
+    new Chart(document.getElementById('hostelChart'), {
+        type: 'bar',
+        data: {
+            labels: chartData.hostels.labels,
+            datasets: [{ label: 'Requests', data: chartData.hostels.data,
+                backgroundColor: chartData.hostels.labels.map((_,i) => PALETTE[i % PALETTE.length]),
+                borderRadius: 4 }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+// 5. Wing bar
+if (chartData.wings.labels.length) {
+    new Chart(document.getElementById('wingChart'), {
+        type: 'bar',
+        data: {
+            labels: chartData.wings.labels,
+            datasets: [{ label: 'Requests', data: chartData.wings.data,
+                backgroundColor: C4, borderRadius: 5 }]
+        },
+        options: barOpts()
+    });
+}
+
+// 6. Avg resolution time bar
+const avgResEl = document.getElementById('avgResChart');
+if (avgResEl && chartData.avg_res.labels.length) {
+    new Chart(avgResEl, {
+        type: 'bar',
+        data: {
+            labels: chartData.avg_res.labels,
+            datasets: [{ label: 'Avg hours', data: chartData.avg_res.data,
+                backgroundColor: C5, borderRadius: 5 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}h avg` } } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours' } } }
+        }
+    });
+}
+</script>
+{% endblock %}

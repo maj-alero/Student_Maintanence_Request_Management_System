@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Notifications</h1>
+    <p>All your recent alerts and updates.</p>
+</div>
+
+<div class="card" style="max-width:680px;">
+    {% if notifications %}
+        {% for notif in notifications %}
+        <div class="notif-item {% if not notif.is_read %}unread{% endif %}">
+            <div class="notif-icon">
+                <i class="ti ti-bell"></i>
+            </div>
+            <div style="flex:1;">
+                <div class="notif-text">{{ notif.message }}</div>
+                <div class="notif-time">{{ notif.created_at|date:"d M Y, H:i" }}</div>
+            </div>
+            {% if not notif.is_read %}
+            <span class="badge badge-accent" style="font-size:10px;">New</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <i class="ti ti-bell-off"></i>
+        <h3>No notifications yet</h3>
+        <p>You'll be notified here when your requests are updated.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

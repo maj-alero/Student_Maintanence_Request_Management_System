@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}User Management{% endblock %}
+{% block page_title %}User management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>User management</h1>
+    <p>View, activate, or deactivate user accounts.</p>
+</div>
+
+<div class="table-wrap">
+    <table class="dt">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users_list %}
+            <tr>
+                <td class="fw-500">{{ u.username }}</td>
+                <td class="text-sm text-secondary">{{ u.email|default:"—" }}</td>
+                <td>
+                    {% if u.role == 'Admin' %}
+                        <span class="badge badge-accent">Admin</span>
+                    {% elif u.role == 'Staff' %}
+                        <span class="badge badge-inprogress">Staff</span>
+                    {% else %}
+                        <span class="badge badge-pending">Student</span>
+                    {% endif %}
+                </td>
+                <td class="text-xs text-muted">{{ u.date_joined|date:"d M Y" }}</td>
+                <td>
+                    {% if u.is_active %}
+                        <span class="badge badge-resolved">Active</span>
+                    {% else %}
+                        <span class="badge badge-high">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u != request.user %}
+                    <form method="post" action="{% url 'toggle_user_active' u.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        {% if u.is_active %}
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="ti ti-user-off"></i> Deactivate
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="ti ti-user-check"></i> Activate
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <span class="text-muted text-xs">You</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;padding:32px;color:var(--t-muted);">
+                    No users found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

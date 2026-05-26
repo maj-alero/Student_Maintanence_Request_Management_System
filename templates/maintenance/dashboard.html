@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}My Requests{% endblock %}
+{% block page_title %}My requests{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My maintenance requests</h1>
+    <p>Track every issue you've reported and its current status.</p>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total submitted</div>
+        <div class="stat-value">{{ requests|length }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color:var(--pend);">
+            {% with c=0 %}{% for r in requests %}{% if r.status == 'Pending' %}{% with c=c|add:1 %}{% endwith %}{% endif %}{% endfor %}{{ requests|length }}{% endwith %}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" style="color:var(--prog);">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" style="color:var(--lo);">—</div>
+    </div>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <h2 style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--t-primary);">
+        All requests
+    </h2>
+    <a href="{% url 'submit_request' %}" class="btn btn-primary btn-sm">
+        <i class="ti ti-plus"></i> New request
+    </a>
+</div>
+
+{% if requests %}
+<div class="table-wrap">
+    <table class="dt">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Category</th>
+                <th>Hostel / Room</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Resolved in</th>
+                <th>Submitted</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td class="text-muted text-xs">{{ req.id }}</td>
+                <td class="fw-500">{{ req.category }}</td>
+                <td class="text-sm">
+                    {% if req.hostel_name %}
+                        {{ req.hostel_name }}<br>
+                        <span class="text-muted text-xs">Wing {{ req.wing }}, Rm {{ req.room_number }}</span>
+                    {% else %}
+                        <span class="text-muted text-xs">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.priority %}
+                        {% if req.priority.priority_label == 'High' %}
+                            <span class="badge badge-high">High</span>
+                        {% elif req.priority.priority_label == 'Medium' %}
+                            <span class="badge badge-medium">Medium</span>
+                        {% else %}
+                            <span class="badge badge-low">Low</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted text-xs">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.status == 'Pending' %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% elif req.status == 'In Progress' %}
+                        <span class="badge badge-inprogress">In Progress</span>
+                    {% else %}
+                        <span class="badge badge-resolved">Resolved</span>
+                    {% endif %}
+                </td>
+                <td class="text-xs text-muted">
+                    {% if req.resolution_time %}{{ req.resolution_time }}{% else %}—{% endif %}
+                </td>
+                <td class="text-xs text-muted">{{ req.timestamp|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">
+                        View
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="ti ti-clipboard-off"></i>
+        <h3>No requests yet</h3>
+        <p>You haven't submitted any maintenance requests. Tap the button below to report an issue.</p>
+        <a href="{% url 'submit_request' %}" class="btn btn-primary" style="margin-top:16px;">
+            <i class="ti ti-plus"></i> Submit a request
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

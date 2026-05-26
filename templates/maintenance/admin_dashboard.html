@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Admin dashboard</h1>
+    <p>All maintenance requests across the system, sorted by most recent.</p>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total requests</div>
+        <div class="stat-value">{{ requests|length }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color:var(--pend);">
+            {% with count=0 %}{% for r in requests %}{% if r.status == 'Pending' %}{% with count=count|add:1 %}{% endwith %}{% endif %}{% endfor %}{% endwith %}
+            {{ requests|dictsortreversed:"status"|length }}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" style="color:var(--prog);">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" style="color:var(--lo);">—</div>
+    </div>
+</div>
+
+<!-- Search + Filters -->
+<div class="card mb-16">
+    <div class="card-title">
+        <i class="ti ti-filter" style="color:var(--accent);"></i>
+        Search &amp; filter
+    </div>
+    <form method="get" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:200px;">
+            <label class="form-label">Search</label>
+            <div style="position:relative;">
+                <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t-muted);font-size:14px;pointer-events:none;"></i>
+                <input class="form-control" type="text" name="q"
+                       value="{{ request.GET.q }}"
+                       placeholder="Description, category, student, hostel…"
+                       style="padding-left:30px;">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;min-width:130px;">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+                <option value="">All statuses</option>
+                <option value="Pending"     {% if request.GET.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if request.GET.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Resolved"    {% if request.GET.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:130px;">
+            <label class="form-label">Category</label>
+            <select class="form-select" name="category">
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;min-width:130px;">
+            <label class="form-label">Priority</label>
+            <select class="form-select" name="priority">
+                <option value="">All priorities</option>
+                {% for p in priorities %}
+                <option value="{{ p }}" {% if request.GET.priority == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Date</label>
+            <input class="form-control" type="date" name="date" value="{{ request.GET.date }}">
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">
+            <i class="ti ti-search"></i> Apply
+        </button>
+        {% if request.GET %}
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline btn-sm">
+            <i class="ti ti-x"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+{% if requests %}
+<div class="table-wrap">
+    <table class="dt">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Category</th>
+                <th>Hostel / Room</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted by</th>
+                <th>Date</th>
+                <th>Resolved in</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in requests %}
+            <tr>
+                <td class="text-muted text-xs">{{ req.id }}</td>
+                <td class="fw-500">{{ req.category }}</td>
+                <td class="text-sm">
+                    {% if req.hostel_name %}
+                        {{ req.hostel_name }}<br>
+                        <span class="text-muted text-xs">Wing {{ req.wing }}, Rm {{ req.room_number }}</span>
+                    {% else %}
+                        <span class="text-muted text-xs">—</span>
+                    {% endif %}
+                </td>
+                <td class="text-sm" style="max-width:160px;">{{ req.description|truncatechars:50 }}</td>
+                <td>
+                    {% if req.priority %}
+                        {% if req.priority.priority_label == 'High' %}
+                            <span class="badge badge-high">High</span>
+                        {% elif req.priority.priority_label == 'Medium' %}
+                            <span class="badge badge-medium">Medium</span>
+                        {% else %}
+                            <span class="badge badge-low">Low</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted text-xs">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if req.status == 'Pending' %}
+                        <span class="badge badge-pending">Pending</span>
+                    {% elif req.status == 'In Progress' %}
+                        <span class="badge badge-inprogress">In Progress</span>
+                    {% else %}
+                        <span class="badge badge-resolved">Resolved</span>
+                    {% endif %}
+                </td>
+                <td class="text-sm">{{ req.submitted_by.username }}</td>
+                <td class="text-xs text-muted">{{ req.timestamp|date:"d M Y" }}</td>
+                <td class="text-xs text-muted">
+                    {% if req.resolution_time %}{{ req.resolution_time }}{% else %}—{% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="ti ti-database-off"></i>
+        <h3>No requests found</h3>
+        <p>Try adjusting your search or filters, or there are no requests in the system yet.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
