@@ -87,12 +87,13 @@
 html { height: 100%; }
 body {
     font-family: var(--font-body);
+    font-size: 15px;
     background: var(--bg-base);
     color: var(--t-primary);
     min-height: 100vh;
     display: flex;
     transition: background var(--ease), color var(--ease);
-    line-height: 1.55;
+    line-height: 1.6;
 }
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; }
@@ -250,10 +251,10 @@ img { max-width: 100%; }
 .page-header { margin-bottom: 20px; }
 .page-header h1 {
     font-family: var(--font-display);
-    font-size: 20px; font-weight: 600;
-    color: var(--t-primary); margin-bottom: 3px;
+    font-size: 22px; font-weight: 600;
+    color: var(--t-primary); margin-bottom: 4px;
 }
-.page-header p { font-size: 13.5px; color: var(--t-secondary); }
+.page-header p { font-size: 15px; color: var(--t-secondary); }
 
 /* ═══════════════════════════════════════════
    STAT GRID
@@ -289,7 +290,7 @@ img { max-width: 100%; }
 }
 .card-title {
     font-family: var(--font-display);
-    font-size: 13px; font-weight: 600;
+    font-size: 14px; font-weight: 600;
     color: var(--t-primary); margin-bottom: 14px;
     display: flex; align-items: center; gap: 8px;
 }
@@ -323,10 +324,10 @@ img { max-width: 100%; }
     border-radius: var(--r-md);
     border: 1px solid var(--border);
 }
-table.dt { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.dt { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.dt thead th {
     background: var(--bg-surface2); color: var(--t-muted);
-    font-size: 10.5px; font-weight: 600;
+    font-size: 11px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.6px;
     padding: 10px 14px; text-align: left;
     border-bottom: 1px solid var(--border); white-space: nowrap;
@@ -343,14 +344,14 @@ table.dt tbody tr:hover td { background: var(--bg-surface2); }
 ═══════════════════════════════════════════ */
 .form-group { margin-bottom: 15px; }
 .form-label {
-    display: block; font-size: 12.5px; font-weight: 500;
+    display: block; font-size: 13.5px; font-weight: 500;
     color: var(--t-secondary); margin-bottom: 5px;
 }
 .form-control, .form-select {
-    width: 100%; padding: 8px 11px;
+    width: 100%; padding: 9px 12px;
     background: var(--bg-surface); border: 1px solid var(--border-md);
     border-radius: var(--r-sm); color: var(--t-primary);
-    font-family: var(--font-body); font-size: 13.5px;
+    font-family: var(--font-body); font-size: 14.5px;
     transition: border-color var(--ease), box-shadow var(--ease);
     outline: none;
 }
@@ -361,16 +362,16 @@ table.dt tbody tr:hover td { background: var(--bg-surface2); }
 textarea.form-control { resize: vertical; min-height: 88px; }
 .form-check { display: flex; align-items: center; gap: 8px; }
 .form-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
-.form-check label { font-size: 13.5px; color: var(--t-primary); cursor: pointer; }
-.form-help { font-size: 11.5px; color: var(--t-muted); margin-top: 4px; }
+.form-check label { font-size: 14px; color: var(--t-primary); cursor: pointer; }
+.form-help { font-size: 12px; color: var(--t-muted); margin-top: 4px; }
 
 /* ═══════════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════════ */
 .btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border-radius: var(--r-sm);
-    font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
+    padding: 9px 18px; border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 14.5px; font-weight: 500;
     cursor: pointer; border: 1px solid transparent;
     transition: all var(--ease); white-space: nowrap;
 }
@@ -383,15 +384,15 @@ textarea.form-control { resize: vertical; min-height: 88px; }
 .btn-danger:hover   { background: var(--hi-bg); }
 .btn-success  { background: transparent; color: var(--lo); border-color: var(--lo); }
 .btn-success:hover  { background: var(--lo-bg); }
-.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
 .btn-block { width: 100%; justify-content: center; }
 
 /* ═══════════════════════════════════════════
    ALERTS
 ═══════════════════════════════════════════ */
 .alert {
-    padding: 10px 14px; border-radius: var(--r-sm);
-    font-size: 13px; margin-bottom: 14px;
+    padding: 11px 15px; border-radius: var(--r-sm);
+    font-size: 14px; margin-bottom: 14px;
     display: flex; align-items: center; gap: 9px; border: 1px solid;
 }
 .alert i { font-size: 16px; flex-shrink: 0; }
@@ -426,11 +427,11 @@ textarea.form-control { resize: vertical; min-height: 88px; }
 }
 .auth-heading {
     font-family: var(--font-display);
-    font-size: 19px; font-weight: 600;
-    color: var(--t-primary); margin-bottom: 5px;
+    font-size: 22px; font-weight: 600;
+    color: var(--t-primary); margin-bottom: 6px;
 }
-.auth-sub { font-size: 13.5px; color: var(--t-secondary); margin-bottom: 22px; }
-.auth-switch { font-size: 13px; color: var(--t-secondary); margin-top: 18px; text-align: center; }
+.auth-sub { font-size: 15px; color: var(--t-secondary); margin-bottom: 22px; }
+.auth-switch { font-size: 14px; color: var(--t-secondary); margin-top: 18px; text-align: center; }
 .auth-switch a { color: var(--accent); font-weight: 500; }
 
 /* Role tabs on register page */
@@ -455,9 +456,9 @@ textarea.form-control { resize: vertical; min-height: 88px; }
     text-align: center; padding: 48px 24px;
     color: var(--t-secondary);
 }
-.empty-state i { font-size: 40px; color: var(--t-muted); margin-bottom: 12px; display: block; }
-.empty-state h3 { font-size: 15px; font-weight: 500; color: var(--t-primary); margin-bottom: 6px; }
-.empty-state p { font-size: 13.5px; }
+.empty-state i { font-size: 44px; color: var(--t-muted); margin-bottom: 12px; display: block; }
+.empty-state h3 { font-size: 17px; font-weight: 500; color: var(--t-primary); margin-bottom: 6px; }
+.empty-state p { font-size: 14.5px; }
 
 /* ═══════════════════════════════════════════
    DETAIL PAGE
@@ -475,12 +476,12 @@ textarea.form-control { resize: vertical; min-height: 88px; }
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-label {
-    font-size: 12px; font-weight: 600;
+    font-size: 12.5px; font-weight: 600;
     color: var(--t-muted); text-transform: uppercase;
-    letter-spacing: 0.5px; min-width: 120px; flex-shrink: 0;
+    letter-spacing: 0.5px; min-width: 130px; flex-shrink: 0;
     padding-top: 1px;
 }
-.detail-value { font-size: 13.5px; color: var(--t-primary); }
+.detail-value { font-size: 14.5px; color: var(--t-primary); }
 
 /* Timeline */
 .timeline { list-style: none; padding: 0; }
@@ -501,8 +502,8 @@ textarea.form-control { resize: vertical; min-height: 88px; }
     flex-shrink: 0; font-size: 13px; color: var(--t-secondary);
 }
 .timeline-body { flex: 1; }
-.timeline-title { font-size: 13px; font-weight: 500; color: var(--t-primary); }
-.timeline-time  { font-size: 11.5px; color: var(--t-muted); margin-top: 2px; }
+.timeline-title { font-size: 14px; font-weight: 500; color: var(--t-primary); }
+.timeline-time  { font-size: 12.5px; color: var(--t-muted); margin-top: 2px; }
 
 /* ═══════════════════════════════════════════
    NOTIFICATION PAGE
@@ -519,8 +520,8 @@ textarea.form-control { resize: vertical; min-height: 88px; }
     display: flex; align-items: center; justify-content: center;
     font-size: 15px; color: var(--t-secondary); flex-shrink: 0;
 }
-.notif-text { font-size: 13.5px; color: var(--t-primary); line-height: 1.5; }
-.notif-time { font-size: 11.5px; color: var(--t-muted); margin-top: 3px; }
+.notif-text { font-size: 14.5px; color: var(--t-primary); line-height: 1.5; }
+.notif-time { font-size: 12.5px; color: var(--t-muted); margin-top: 3px; }
 
 /* ═══════════════════════════════════════════
    MOBILE OVERLAY
@@ -546,8 +547,8 @@ textarea.form-control { resize: vertical; min-height: 88px; }
 ═══════════════════════════════════════════ */
 .text-muted    { color: var(--t-muted); }
 .text-secondary{ color: var(--t-secondary); }
-.text-sm  { font-size: 12.5px; }
-.text-xs  { font-size: 11.5px; }
+.text-sm  { font-size: 13px; }
+.text-xs  { font-size: 12px; }
 .fw-500   { font-weight: 500; }
 .d-flex   { display: flex; }
 .align-center { align-items: center; }

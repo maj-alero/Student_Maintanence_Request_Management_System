@@ -19,16 +19,12 @@ class MaintenanceRequest(models.Model):
         ('Plumbing', 'Plumbing'),
         ('Electrical', 'Electrical'),
         ('Carpentry', 'Carpentry'),
-        ('Structural', 'Structural'),
-        ('Furniture', 'Furniture'),
-        ('Other', 'Other'),
     )
 
     LOCATION_CHOICES = (
         ('Bathroom', 'Bathroom'),
         ('Room', 'Room'),
         ('Corridor', 'Corridor'),
-        ('Common Area', 'Common Area'),
     )
 
     WING_CHOICES = [(c, f'Wing {c}') for c in 'ABCDEFGH']

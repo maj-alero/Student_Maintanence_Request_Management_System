@@ -1,51 +1,343 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}FixIt — Hostel Maintenance Request System{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Landing page styles ── */
+.lp-wrap {
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--bg-base); color: var(--t-primary);
+}
+
+/* Hero */
+.hero {
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    padding: 80px 24px 64px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+}
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-lt); color: var(--accent);
+    font-size: 12.5px; font-weight: 600;
+    padding: 5px 13px; border-radius: 20px; margin-bottom: 22px;
+    border: 1px solid rgba(79,70,229,.18);
+}
+.hero h1 {
+    font-family: var(--font-display);
+    font-size: 42px; font-weight: 700;
+    color: var(--t-primary); line-height: 1.2;
+    max-width: 680px; margin-bottom: 18px;
+}
+.hero h1 span { color: var(--accent); }
+.hero p {
+    font-size: 17px; color: var(--t-secondary);
+    max-width: 520px; line-height: 1.7; margin-bottom: 36px;
+}
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* Section label */
+.section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 10px;
+}
+
+/* Features */
+.features-section { padding: 72px 48px; }
+.features-header { text-align: center; margin-bottom: 48px; }
+.features-header h2 {
+    font-family: var(--font-display);
+    font-size: 30px; font-weight: 700;
+    color: var(--t-primary); margin-bottom: 12px;
+}
+.features-header p { font-size: 16px; color: var(--t-secondary); max-width: 500px; margin: 0 auto; }
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; max-width: 1100px; margin: 0 auto;
+}
+.feature-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 24px;
+    transition: box-shadow .18s ease, transform .18s ease;
+}
+.feature-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.09); transform: translateY(-2px); }
+.feature-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--accent-lt); display: flex;
+    align-items: center; justify-content: center;
+    margin-bottom: 16px;
+}
+.feature-icon i { font-size: 22px; color: var(--accent); }
+.feature-card h3 {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 600;
+    color: var(--t-primary); margin-bottom: 8px;
+}
+.feature-card p { font-size: 14px; color: var(--t-secondary); line-height: 1.65; }
+
+/* How it works */
+.how-section {
+    padding: 72px 48px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+.how-section .features-header { margin-bottom: 52px; }
+.steps-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0; max-width: 900px; margin: 0 auto;
+    position: relative;
+}
+.step {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 0 24px; position: relative;
+}
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute; right: 0; top: 28px;
+    width: 1px; height: 40px;
+    background: var(--border-md);
+}
+.step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 20px; font-weight: 700;
+    margin-bottom: 16px; flex-shrink: 0;
+}
+.step h3 {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 600;
+    color: var(--t-primary); margin-bottom: 8px;
+}
+.step p { font-size: 14px; color: var(--t-secondary); line-height: 1.6; }
+
+/* Roles */
+.roles-section { padding: 72px 48px; }
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px; max-width: 900px; margin: 0 auto;
+}
+.role-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 24px;
+}
+.role-card-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+}
+.role-card-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+}
+.role-card-icon i { font-size: 20px; color: #fff; }
+.role-card h3 {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 600; color: var(--t-primary);
+}
+.role-card ul {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 9px;
+}
+.role-card ul li {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 14px; color: var(--t-secondary); line-height: 1.5;
+}
+.role-card ul li i { font-size: 15px; color: var(--accent); margin-top: 1px; flex-shrink: 0; }
+
+/* Footer strip */
+.lp-footer {
+    padding: 28px 48px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+}
+.lp-footer-brand {
+    display: flex; align-items: center; gap: 9px;
+}
+.lp-footer-brand-icon {
+    width: 30px; height: 30px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+}
+.lp-footer-brand-icon i { color: #fff; font-size: 15px; }
+.lp-footer-brand span {
+    font-family: var(--font-display); font-size: 15px;
+    font-weight: 600; color: var(--t-primary);
+}
+.lp-footer p { font-size: 13px; color: var(--t-muted); }
+
+@media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+    .hero p   { font-size: 15px; }
+    .features-section, .how-section, .roles-section { padding: 48px 20px; }
+    .lp-footer { padding: 24px 20px; }
+    .step:not(:last-child)::after { display: none; }
+}
+</style>
+{% endblock %}
 
 {% block auth_content %}
-<div style="min-height:100vh;flex:1;display:flex;align-items:center;justify-content:center;
-            flex-direction:column;text-align:center;padding:40px 24px;
-            background:var(--bg-base);">
+<div class="lp-wrap">
 
-    <div style="width:56px;height:56px;background:var(--accent);border-radius:14px;
-                display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
-        <i class="ti ti-tool" style="font-size:28px;color:#fff;"></i>
-    </div>
-
-    <h1 style="font-family:var(--font-display);font-size:28px;font-weight:600;
-               color:var(--t-primary);margin-bottom:10px;">
-        Hostel Maintenance Request System
-    </h1>
-    <p style="font-size:15px;color:var(--t-secondary);max-width:460px;line-height:1.6;margin-bottom:32px;">
-        Report and track hostel facility issues. Our AI automatically prioritises your
-        request so the most urgent problems get fixed first.
-    </p>
-
-    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-        <a href="{% url 'login' %}" class="btn btn-primary">
-            <i class="ti ti-login"></i> Sign in
-        </a>
-        <a href="{% url 'register' %}" class="btn btn-outline">
-            <i class="ti ti-user-plus"></i> Create account
-        </a>
-    </div>
-
-    <div style="margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);
-                gap:16px;max-width:640px;width:100%;">
-        <div class="card" style="text-align:left;">
-            <i class="ti ti-bolt" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
-            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">AI Prioritisation</div>
-            <div style="font-size:12.5px;color:var(--t-secondary);">Machine learning ranks every request by urgency automatically.</div>
+    <!-- ── HERO ─────────────────────────────────────────────────────── -->
+    <section class="hero">
+        <div class="hero-badge">
+            <i class="ti ti-sparkles"></i> Powered by AI prioritisation
         </div>
-        <div class="card" style="text-align:left;">
-            <i class="ti ti-eye" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
-            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">Live tracking</div>
-            <div style="font-size:12.5px;color:var(--t-secondary);">Follow your request from submission to resolution in real time.</div>
+        <h1>Smarter hostel maintenance, <span>faster fixes</span></h1>
+        <p>
+            FixIt is the all-in-one platform for reporting, tracking and resolving
+            hostel facility issues — with AI that automatically routes the most urgent
+            problems to the right people.
+        </p>
+        <div class="hero-btns">
+            <a href="{% url 'login' %}" class="btn btn-primary" style="font-size:15px;padding:11px 28px;">
+                <i class="ti ti-login"></i> Sign in
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-outline" style="font-size:15px;padding:11px 28px;">
+                <i class="ti ti-user-plus"></i> Create account
+            </a>
         </div>
-        <div class="card" style="text-align:left;">
-            <i class="ti ti-chart-bar" style="font-size:22px;color:var(--accent);margin-bottom:8px;display:block;"></i>
-            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--t-primary);margin-bottom:4px;">Analytics</div>
-            <div style="font-size:12.5px;color:var(--t-secondary);">Admins see trends, hotspots, and predictive insights.</div>
+    </section>
+
+    <!-- ── FEATURES ──────────────────────────────────────────────────── -->
+    <section class="features-section">
+        <div class="features-header">
+            <div class="section-label">Features</div>
+            <h2>Everything you need in one place</h2>
+            <p>Built for students, maintenance staff, and administrators to work together seamlessly.</p>
         </div>
-    </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-robot"></i></div>
+                <h3>AI Priority Classification</h3>
+                <p>Our machine learning model analyses every request and automatically assigns a High, Medium or Low priority — so urgent issues like electrical faults or flooding are never buried in a backlog.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-radar"></i></div>
+                <h3>Real-time Status Tracking</h3>
+                <p>Students see their request status update live — from Pending to In Progress to Resolved — without refreshing the page. You always know exactly where your issue stands.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-photo"></i></div>
+                <h3>Photo Uploads</h3>
+                <p>Attach a photo of the damage when submitting a request. A picture helps staff understand the problem immediately and arrive prepared with the right tools and materials.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-user-check"></i></div>
+                <h3>Staff Assignment</h3>
+                <p>Administrators can assign each request to the right maintenance staff member, add notes, and override the AI priority when needed — keeping the workflow efficient and accountable.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-chart-bar"></i></div>
+                <h3>Predictive Analytics</h3>
+                <p>The analytics dashboard reveals which hostels, wings and issue types are generating the most requests, enabling proactive preventive maintenance before small problems become big ones.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="ti ti-bell"></i></div>
+                <h3>Instant Notifications</h3>
+                <p>Everyone stays informed with in-app notifications at every step — request received, staff assigned, status changed, and resolved — so nothing falls through the cracks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ──────────────────────────────────────────────── -->
+    <section class="how-section">
+        <div class="features-header">
+            <div class="section-label">How it works</div>
+            <h2>From report to resolution in three steps</h2>
+            <p>A simple process designed so issues get fixed quickly and transparently.</p>
+        </div>
+        <div class="steps-row">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Submit a request</h3>
+                <p>Describe the issue, attach a photo, and specify your hostel, wing and room number. The whole form takes under two minutes.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>AI prioritises &amp; assigns</h3>
+                <p>The AI model classifies urgency instantly. An admin reviews and assigns the request to the right maintenance staff member.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Track to resolution</h3>
+                <p>Follow your request live and receive notifications at every status change. Once resolved, the resolution time is recorded for reporting.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── ROLE OVERVIEW ─────────────────────────────────────────────── -->
+    <section class="roles-section">
+        <div class="features-header">
+            <div class="section-label">Who it's for</div>
+            <h2>Designed for every role</h2>
+            <p>Each user type has a tailored dashboard with exactly the tools they need.</p>
+        </div>
+        <div class="roles-grid">
+            <div class="role-card">
+                <div class="role-card-header">
+                    <div class="role-card-icon" style="background:#4F46E5;">
+                        <i class="ti ti-school"></i>
+                    </div>
+                    <h3>Students</h3>
+                </div>
+                <ul>
+                    <li><i class="ti ti-check"></i> Submit maintenance requests in minutes</li>
+                    <li><i class="ti ti-check"></i> Attach photos to describe damage clearly</li>
+                    <li><i class="ti ti-check"></i> Track request status in real time</li>
+                    <li><i class="ti ti-check"></i> Receive notifications at every update</li>
+                </ul>
+            </div>
+            <div class="role-card">
+                <div class="role-card-header">
+                    <div class="role-card-icon" style="background:#059669;">
+                        <i class="ti ti-tool"></i>
+                    </div>
+                    <h3>Maintenance Staff</h3>
+                </div>
+                <ul>
+                    <li><i class="ti ti-check"></i> View your assigned work queue</li>
+                    <li><i class="ti ti-check"></i> See full request details and photos</li>
+                    <li><i class="ti ti-check"></i> Update request status as work progresses</li>
+                    <li><i class="ti ti-check"></i> Get notified when new jobs are assigned</li>
+                </ul>
+            </div>
+            <div class="role-card">
+                <div class="role-card-header">
+                    <div class="role-card-icon" style="background:#D97706;">
+                        <i class="ti ti-shield-check"></i>
+                    </div>
+                    <h3>Administrators</h3>
+                </div>
+                <ul>
+                    <li><i class="ti ti-check"></i> Oversee all requests across every hostel</li>
+                    <li><i class="ti ti-check"></i> Assign tasks and override AI priorities</li>
+                    <li><i class="ti ti-check"></i> Analyse trends, hotspots and resolution times</li>
+                    <li><i class="ti ti-check"></i> Manage user accounts and access levels</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ────────────────────────────────────────────────────── -->
+    <footer class="lp-footer">
+        <div class="lp-footer-brand">
+            <div class="lp-footer-brand-icon"><i class="ti ti-tool"></i></div>
+            <span>FixIt — SMRMS</span>
+        </div>
+        <p>Student Maintenance Request Management System &nbsp;·&nbsp; Final Year Project</p>
+        <div style="position:fixed;top:14px;right:16px;z-index:300;">
+            <button class="btn-icon" onclick="toggleTheme()"
+                    style="background:var(--bg-surface);border:1px solid var(--border);">
+                <i class="ti ti-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </footer>
+
 </div>
 {% endblock auth_content %}

@@ -20,12 +20,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='maintenancerequest',
             name='category',
-            field=models.CharField(choices=[('Plumbing', 'Plumbing'), ('Electrical', 'Electrical'), ('Carpentry', 'Carpentry'), ('Structural', 'Structural'), ('Furniture', 'Furniture'), ('Other', 'Other')], max_length=50),
+            field=models.CharField(choices=[('Plumbing', 'Plumbing'), ('Electrical', 'Electrical'), ('Carpentry', 'Carpentry')], max_length=50),
         ),
         migrations.AlterField(
             model_name='maintenancerequest',
             name='location',
-            field=models.CharField(choices=[('Bathroom', 'Bathroom'), ('Room', 'Room'), ('Corridor', 'Corridor'), ('Common Area', 'Common Area')], max_length=100),
+            field=models.CharField(choices=[('Bathroom', 'Bathroom'), ('Room', 'Room'), ('Corridor', 'Corridor')], max_length=100),
         ),
         migrations.CreateModel(
             name='Notification',
