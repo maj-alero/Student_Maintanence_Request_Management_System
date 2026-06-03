@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My profile</h1>
+    <p>Manage your account details and view your activity summary.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
+
+    <!-- LEFT: account info -->
+    <div>
+        <!-- Avatar + identity -->
+        <div class="card" style="text-align:center;padding:28px 20px;">
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--accent);
+                        display:flex;align-items:center;justify-content:center;
+                        font-family:var(--font-display);font-size:28px;font-weight:700;
+                        color:#fff;margin:0 auto 14px;">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+            <div style="font-family:var(--font-display);font-size:17px;font-weight:600;
+                        color:var(--t-primary);margin-bottom:4px;">
+                {{ user.get_full_name|default:user.username }}
+            </div>
+            <div style="font-size:13px;color:var(--t-secondary);margin-bottom:12px;">
+                @{{ user.username }}
+            </div>
+            <span class="badge {% if user.role == 'Admin' %}badge-high{% elif user.role == 'Staff' %}badge-medium{% else %}badge-accent{% endif %}"
+                  style="font-size:12px;">
+                {{ user.role }}
+            </span>
+            <div style="height:1px;background:var(--border);margin:18px 0;"></div>
+            <div style="font-size:13px;color:var(--t-muted);">
+                Member since {{ user.date_joined|date:"N Y" }}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-title">
+                <i class="ti ti-settings" style="color:var(--accent);"></i>
+                Account actions
+            </div>
+            <a href="{% url 'password_change' %}" class="btn btn-outline w-100"
+               style="justify-content:flex-start;margin-bottom:8px;">
+                <i class="ti ti-lock"></i> Change password
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-danger w-100"
+               style="justify-content:flex-start;">
+                <i class="ti ti-logout"></i> Sign out
+            </a>
+        </div>
+    </div>
+
+    <!-- RIGHT: details + analytics -->
+    <div>
+        <!-- Edit profile form -->
+        <div class="card">
+            <div class="card-title">
+                <i class="ti ti-pencil" style="color:var(--accent);"></i>
+                Edit profile
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+                    <div class="form-group">
+                        <label class="form-label">First name</label>
+                        <input class="form-control" type="text" name="first_name"
+                               value="{{ form.first_name.value|default:'' }}"
+                               placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last name</label>
+                        <input class="form-control" type="text" name="last_name"
+                               value="{{ form.last_name.value|default:'' }}"
+                               placeholder="Last name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email address</label>
+                    <input class="form-control" type="email" name="email"
+                           value="{{ form.email.value|default:'' }}"
+                           placeholder="your@email.com">
+                    <span class="form-help">Used for status update notifications.</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="ti ti-check"></i> Save changes
+                </button>
+            </form>
+        </div>
+
+        <!-- Analytics -->
+        {% if stats %}
+        <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
+            <div class="stat-card">
+                <div class="stat-label">
+                    {% if user.role == 'Staff' %}Assigned{% else %}Submitted{% endif %}
+                </div>
+                <div class="stat-value">{{ stats.total }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending</div>
+                <div class="stat-value" style="color:var(--pend);">{{ stats.pending }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">In progress</div>
+                <div class="stat-value" style="color:var(--prog);">{{ stats.in_progress }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Resolved</div>
+                <div class="stat-value" style="color:var(--lo);">{{ stats.resolved }}</div>
+            </div>
+            {% if stats.avg_resolution %}
+            <div class="stat-card">
+                <div class="stat-label">Avg resolution</div>
+                <div class="stat-value" style="font-size:20px;">{{ stats.avg_resolution }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Category breakdown -->
+        {% if category_breakdown %}
+        <div class="card">
+            <div class="card-title">
+                <i class="ti ti-chart-bar" style="color:var(--accent);"></i>
+                {% if user.role == 'Staff' %}Issues handled by category{% else %}Your requests by category{% endif %}
+            </div>
+            {% for row in category_breakdown %}
+            <div style="margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;
+                            font-size:13.5px;margin-bottom:5px;">
+                    <span style="font-weight:500;">{{ row.category }}</span>
+                    <span style="color:var(--t-secondary);">{{ row.count }}</span>
+                </div>
+                <div style="height:6px;background:var(--bg-base);border-radius:3px;overflow:hidden;">
+                    {% with pct=row.count|floatformat:0 %}
+                    <div style="height:100%;border-radius:3px;background:var(--accent);
+                                width:{% widthratio row.count stats.total 100 %}%;">
+                    </div>
+                    {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Recent requests -->
+        {% if recent_requests %}
+        <div class="card">
+            <div class="card-title">
+                <i class="ti ti-history" style="color:var(--accent);"></i>
+                Recent requests
+            </div>
+            <div class="table-wrap" style="border:none;">
+                <table class="dt">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Category</th>
+                            <th>Hostel / Room</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in recent_requests %}
+                        <tr>
+                            <td class="text-muted text-xs">{{ req.id }}</td>
+                            <td class="fw-500">{{ req.category }}</td>
+                            <td class="text-sm">
+                                {{ req.hostel_name }}<br>
+                                <span class="text-muted text-xs">Wing {{ req.wing }}, Rm {{ req.room_number }}</span>
+                            </td>
+                            <td>
+                                {% if req.status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+                                {% elif req.status == 'In Progress' %}<span class="badge badge-inprogress">In Progress</span>
+                                {% else %}<span class="badge badge-resolved">Resolved</span>{% endif %}
+                            </td>
+                            <td class="text-xs text-muted">{{ req.timestamp|date:"d M Y" }}</td>
+                            <td>
+                                <a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

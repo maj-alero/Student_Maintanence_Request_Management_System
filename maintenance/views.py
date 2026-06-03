@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, View, CreateView, DetailView
 from django.contrib import messages
-from django.contrib.auth.views import LoginView as AuthLoginView
+from django.contrib.auth.views import LoginView as AuthLoginView, PasswordChangeView
 from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from django.http import JsonResponse
@@ -14,6 +14,7 @@ from .forms import (
     StudentRegistrationForm, StaffRegistrationForm,
     MaintenanceRequestForm, StatusUpdateForm,
     AssignmentForm, PriorityOverrideForm,
+    ProfileUpdateForm, CustomPasswordChangeForm,
 )
 from .models import User, MaintenanceRequest, PriorityClassification, StatusHistory, Notification
 from .decorators import student_required, staff_required, staff_or_admin_required
@@ -504,3 +505,81 @@ class RequestStatusJsonView(View):
             'latest_changed_at': latest.changed_at.isoformat() if latest else None,
             'latest_changed_by': latest.changed_by.username if latest and latest.changed_by else None,
         })
+
+
+@method_decorator(login_required, name='dispatch')
+class ProfileView(View):
+    template_name = 'maintenance/profile.html'
+
+    def get(self, request):
+        form = ProfileUpdateForm(instance=request.user)
+        context = self._build_context(request, form)
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        form = ProfileUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('profile')
+        context = self._build_context(request, form)
+        return render(request, self.template_name, context)
+
+    def _build_context(self, request, form):
+        from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+        user = request.user
+        context = {'form': form}
+
+        if user.role == 'Student':
+            qs = MaintenanceRequest.objects.filter(submitted_by=user)
+            context['stats'] = {
+                'total':       qs.count(),
+                'pending':     qs.filter(status='Pending').count(),
+                'in_progress': qs.filter(status='In Progress').count(),
+                'resolved':    qs.filter(status='Resolved').count(),
+            }
+            context['category_breakdown'] = list(
+                qs.values('category').annotate(count=Count('id')).order_by('-count')
+            )
+            context['recent_requests'] = qs.order_by('-timestamp')[:5]
+
+        elif user.role == 'Staff':
+            qs = MaintenanceRequest.objects.filter(
+                assignments__assigned_to=user
+            ).distinct()
+            resolved_qs = qs.filter(status='Resolved', resolved_at__isnull=False)
+            avg_res = resolved_qs.aggregate(
+                avg=Avg(ExpressionWrapper(
+                    F('resolved_at') - F('timestamp'),
+                    output_field=DurationField()
+                ))
+            )['avg']
+            if avg_res:
+                total_h = avg_res.total_seconds() / 3600
+                avg_res_display = f"{total_h/24:.1f}d" if total_h >= 24 else f"{total_h:.1f}h"
+            else:
+                avg_res_display = '—'
+
+            context['stats'] = {
+                'total':           qs.count(),
+                'pending':         qs.filter(status='Pending').count(),
+                'in_progress':     qs.filter(status='In Progress').count(),
+                'resolved':        resolved_qs.count(),
+                'avg_resolution':  avg_res_display,
+            }
+            context['category_breakdown'] = list(
+                qs.values('category').annotate(count=Count('id')).order_by('-count')
+            )
+            context['recent_requests'] = qs.order_by('-timestamp')[:5]
+
+        return context
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'maintenance/password_change.html'
+    success_url = '/profile/'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Password changed successfully.')
+        return super().form_valid(form)

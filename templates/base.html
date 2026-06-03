@@ -89,16 +89,24 @@
                     <span class="badge badge-accent" style="margin-left:auto;padding:1px 6px;font-size:10px;">{{ unread_count }}</span>
                 {% endif %}
             </a>
+            <a href="{% url 'profile' %}"
+               {% if request.resolver_match.url_name == 'profile' %}class="active"{% endif %}>
+                <i class="ti ti-user-circle"></i> My profile
+            </a>
         </nav>
 
         <div class="sb-bottom">
-            <div class="sb-user">
+            <a href="{% url 'profile' %}" style="display:flex;align-items:center;gap:9px;
+               padding:9px 11px;border-radius:var(--r-sm);text-decoration:none;
+               transition:background var(--ease);"
+               onmouseover="this.style.background='var(--bg-shover)'"
+               onmouseout="this.style.background='transparent'">
                 <div class="sb-avatar">{{ user.username|slice:":1"|upper }}</div>
                 <div>
                     <div class="sb-uname">{{ user.username }}</div>
                     <div class="sb-urole">{{ user.role }}</div>
                 </div>
-            </div>
+            </a>
             <a href="{% url 'logout' %}" class="sb-logout">
                 <i class="ti ti-logout"></i> Sign out
             </a>

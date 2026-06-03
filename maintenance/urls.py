@@ -1,4 +1,8 @@
 from django.urls import path
+from django.contrib.auth.views import (
+    PasswordResetView, PasswordResetDoneView,
+    PasswordResetConfirmView, PasswordResetCompleteView,
+)
 from .views import (
     HomeView, DashboardView,
     StudentDashboardView, StaffDashboardView, AdminDashboardView,
@@ -7,6 +11,7 @@ from .views import (
     UserManagementView, ToggleUserActiveView,
     TrendAnalysisView, NotificationsView,
     RequestStatusJsonView,
+    ProfileView, CustomPasswordChangeView,
     CustomLoginView, register_view, custom_logout_view,
 )
 
@@ -26,6 +31,24 @@ urlpatterns = [
     path('users/<int:pk>/toggle/',              ToggleUserActiveView.as_view(),  name='toggle_user_active'),
     path('analytics/',                          TrendAnalysisView.as_view(),     name='trend_analysis'),
     path('notifications/',                      NotificationsView.as_view(),     name='notifications'),
+    path('profile/',                            ProfileView.as_view(),           name='profile'),
+    path('password/change/',                    CustomPasswordChangeView.as_view(), name='password_change'),
+    path('password/reset/',                     PasswordResetView.as_view(
+                                                    template_name='maintenance/password_reset_form.html',
+                                                    email_template_name='maintenance/password_reset_email.html',
+                                                    subject_template_name='maintenance/password_reset_subject.txt',
+                                                    success_url='/password/reset/done/',
+                                                ), name='password_reset'),
+    path('password/reset/done/',                PasswordResetDoneView.as_view(
+                                                    template_name='maintenance/password_reset_done.html',
+                                                ), name='password_reset_done'),
+    path('password/reset/<uidb64>/<token>/',    PasswordResetConfirmView.as_view(
+                                                    template_name='maintenance/password_reset_confirm.html',
+                                                    success_url='/password/reset/complete/',
+                                                ), name='password_reset_confirm'),
+    path('password/reset/complete/',            PasswordResetCompleteView.as_view(
+                                                    template_name='maintenance/password_reset_complete.html',
+                                                ), name='password_reset_complete'),
     path('login/',                              CustomLoginView.as_view(),       name='login'),
     path('register/',                           register_view,                   name='register'),
     path('logout/',                             custom_logout_view,              name='logout'),

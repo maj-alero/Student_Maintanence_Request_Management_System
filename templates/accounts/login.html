@@ -32,6 +32,10 @@
                 <input class="form-control" type="password" name="password" id="id_password"
                        placeholder="Enter your password" required>
             </div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:4px;">
+                <a href="{% url 'password_reset' %}"
+                   style="font-size:13px;color:var(--accent);">Forgot password?</a>
+            </div>
             <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">
                 <i class="ti ti-login"></i> Sign in
             </button>
