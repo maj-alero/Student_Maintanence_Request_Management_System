@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from .models import User, MaintenanceRequest
+from .models import User, MaintenanceRequest, StaffFeedback
 
 
 class ProfileUpdateForm(forms.ModelForm):
@@ -94,3 +94,17 @@ class PriorityOverrideForm(forms.ModelForm):
         widgets = {
             'priority_label': forms.Select(attrs={'class': 'form-select'})
         }
+
+
+class StaffFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = StaffFeedback
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Type your update or message to the student…',
+            })
+        }
+        labels = {'message': 'Message'}

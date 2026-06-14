@@ -28,8 +28,8 @@
     --t-sidebar:    rgba(255,255,255,0.62);
     --t-sactive:    #FFFFFF;
 
-    --border:       rgba(0,0,0,0.08);
-    --border-md:    rgba(0,0,0,0.13);
+    --border:       rgba(0,0,0,0.18);
+    --border-md:    rgba(0,0,0,0.28);
 
     --accent:       #4F46E5;
     --accent-h:     #4338CA;
@@ -61,8 +61,8 @@
     --t-sidebar:    rgba(255,255,255,0.5);
     --t-sactive:    #E8E8F4;
 
-    --border:       rgba(255,255,255,0.07);
-    --border-md:    rgba(255,255,255,0.12);
+    --border:       rgba(255,255,255,0.15);
+    --border-md:    rgba(255,255,255,0.25);
 
     --accent:       #6366F1;
     --accent-h:     #818CF8;

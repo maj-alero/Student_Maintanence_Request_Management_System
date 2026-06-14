@@ -117,6 +117,36 @@
         </div>
         {% endif %}
 
+        <!-- Staff feedback thread -->
+        {% if feedback_list %}
+        <div class="card mb-16">
+            <div class="card-title">
+                <i class="ti ti-message-circle" style="color:var(--accent);"></i>
+                Staff updates
+            </div>
+            {% for fb in feedback_list %}
+            <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);
+                            display:flex;align-items:center;justify-content:center;
+                            font-size:12px;font-weight:600;color:#fff;flex-shrink:0;">
+                    {{ fb.author.get_full_name|default:fb.author.username|slice:":1"|upper }}
+                </div>
+                <div style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                        <span style="font-size:13px;font-weight:600;color:var(--t-primary);">
+                            {{ fb.author.get_full_name|default:fb.author.username }}
+                        </span>
+                        <span style="font-size:11px;color:var(--t-muted);">
+                            {{ fb.created_at|date:"d M Y, H:i" }}
+                        </span>
+                    </div>
+                    <p style="font-size:14px;color:var(--t-primary);line-height:1.5;margin:0;">{{ fb.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Status history timeline -->
         <div class="card">
             <div class="card-title">
@@ -154,6 +184,25 @@
 
     <!-- RIGHT: action panels -->
     <div>
+
+        <!-- Staff: send feedback to student -->
+        {% if user.role == 'Staff' or user.role == 'Admin' or user.is_superuser %}
+        <div class="card mb-16">
+            <div class="card-title">
+                <i class="ti ti-message-forward" style="color:var(--accent);"></i>
+                Send update to student
+            </div>
+            <form method="post" action="{% url 'staff_feedback' req.pk %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ feedback_form.message }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="ti ti-send"></i> Send
+                </button>
+            </form>
+        </div>
+        {% endif %}
 
         <!-- Staff: update status -->
         {% if user.role == 'Staff' or user.role == 'Admin' or user.is_superuser %}

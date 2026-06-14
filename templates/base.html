@@ -40,7 +40,7 @@
             <div class="sb-section-label">Navigation</div>
 
             <a href="{% url 'dashboard' %}"
-               {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+               {% if request.resolver_match.url_name in 'student_home,staff_home,admin_dashboard' %}class="active"{% endif %}>
                 <i class="ti ti-layout-dashboard"></i> Dashboard
             </a>
 
@@ -77,6 +77,10 @@
                 <a href="{% url 'trend_analysis' %}"
                    {% if request.resolver_match.url_name == 'trend_analysis' %}class="active"{% endif %}>
                     <i class="ti ti-chart-bar"></i> Analytics
+                </a>
+                <a href="{% url 'reports' %}"
+                   {% if request.resolver_match.url_name == 'reports' %}class="active"{% endif %}>
+                    <i class="ti ti-file-analytics"></i> Reports
                 </a>
             {% endif %}
 

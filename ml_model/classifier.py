@@ -17,6 +17,9 @@ label_encoder   = joblib.load(ENCODER_PATH)
 feature_columns = joblib.load(COLUMNS_PATH)
 
 
+_IMPACT_MAP = {"Low": 1, "Medium": 2, "High": 3}
+
+
 def predict_priority(category, location, urgency_level,
                      affected_users, time_sensitivity,
                      impact_level, recurrence):
@@ -24,22 +27,13 @@ def predict_priority(category, location, urgency_level,
     Takes raw form values and returns a priority label string.
     Returns: "High", "Medium", or "Low"
     """
-
-    # Map form values to the same encoding used during training
-    affected_map = {
-        "Just me (1)"          : 1,
-        "2-5 students"         : 2,
-        "6-15 students"        : 3,
-        "More than 15 students": 4,
-    }
-
     input_data = {
         "request_category" : category,
         "location"         : location,
         "urgency_level"    : int(urgency_level),
-        "affected_users"   : affected_map.get(affected_users, int(affected_users)),
+        "affected_users"   : int(affected_users),
         "time_sensitivity" : 1 if time_sensitivity in [True, 1, "Yes", "on"] else 0,
-        "impact_level"     : int(impact_level),
+        "impact_level"     : _IMPACT_MAP[str(impact_level)] if str(impact_level) in _IMPACT_MAP else int(impact_level),
         "recurrence"       : 1 if recurrence in [True, 1, "Yes", "on"] else 0,
     }
 

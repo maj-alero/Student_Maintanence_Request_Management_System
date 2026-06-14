@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% block title %}{{ period_label }} Maintenance Report{% endblock %}
+{% block page_title %}Maintenance reports{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── screen styles ── */
+.report-meta {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 24px;
+}
+.urgency-bar {
+    height: 4px; border-radius: 2px; margin-top: 6px;
+}
+.rec-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 20px 22px; margin-bottom: 16px;
+}
+.rec-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px; margin-bottom: 14px;
+}
+.rec-location {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 600; color: var(--t-primary);
+    margin-bottom: 2px;
+}
+.rec-sub { font-size: 13px; color: var(--t-secondary); }
+.step-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+.step-list li {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 13.5px; color: var(--t-secondary); line-height: 1.5;
+}
+.step-list li::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0; margin-top: 7px;
+}
+.cat-advice-card {
+    background: var(--bg-surface2); border-radius: var(--r-md);
+    padding: 16px 18px; margin-bottom: 12px;
+}
+.summary-band {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+}
+.summary-item { text-align: center; }
+.summary-num {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 700; line-height: 1;
+    margin-bottom: 4px;
+}
+.summary-lbl { font-size: 11.5px; color: var(--t-muted); text-transform: uppercase; letter-spacing: .6px; }
+
+/* ── print styles ── */
+@media print {
+    .no-print { display: none !important; }
+    .page-body { padding: 0 !important; }
+    .rec-card, .cat-advice-card { break-inside: avoid; }
+    body { font-size: 12px; }
+    .rec-location { font-size: 13px; }
+    .summary-num { font-size: 22px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Header + controls ─────────────────────────────────────── -->
+<div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h1>{{ period_label }} maintenance report</h1>
+        <p>
+            Period: <strong>{{ start_date|date:"d M Y" }}</strong> — <strong>{{ generated_at|date:"d M Y" }}</strong>
+            &nbsp;·&nbsp; Generated {{ generated_at|date:"d M Y, H:i" }}
+        </p>
+    </div>
+    <div class="no-print" style="display:flex;gap:8px;align-items:center;">
+        <!-- Period toggle -->
+        <form method="get" style="display:flex;gap:6px;">
+            <a href="?period=weekly"
+               class="btn {% if period == 'weekly' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+               Weekly
+            </a>
+            <a href="?period=monthly"
+               class="btn {% if period == 'monthly' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+               Monthly
+            </a>
+        </form>
+        <a href="{% url 'reports_pdf' %}?period={{ period }}"
+           class="btn btn-primary btn-sm">
+            <i class="ti ti-file-download"></i> Download PDF
+        </a>
+    </div>
+</div>
+
+<!-- ── Summary band ──────────────────────────────────────────── -->
+<div class="summary-band">
+    <div class="summary-item">
+        <div class="summary-num">{{ total }}</div>
+        <div class="summary-lbl">Total reports</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-num" style="color:var(--lo);">{{ resolved }}</div>
+        <div class="summary-lbl">Resolved</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-num" style="color:var(--hi);">{{ unresolved }}</div>
+        <div class="summary-lbl">Unresolved</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-num" style="color:var(--med);">{{ recurring_count }}</div>
+        <div class="summary-lbl">Recurring</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-num" style="color:{% if high_unresolved > 0 %}var(--hi){% else %}var(--lo){% endif %};">
+            {{ high_unresolved }}
+        </div>
+        <div class="summary-lbl">High-priority open</div>
+    </div>
+    <div class="summary-item">
+        <div class="summary-num"
+             style="color:{% if trend_delta > 0 %}var(--hi){% elif trend_delta < 0 %}var(--lo){% else %}var(--t-secondary){% endif %};">
+            {% if trend_delta > 0 %}+{% endif %}{{ trend_delta }}
+        </div>
+        <div class="summary-lbl">vs prev. period</div>
+    </div>
+</div>
+
+{% if not recommendations %}
+<div class="card">
+    <div class="empty-state">
+        <i class="ti ti-circle-check" style="color:var(--lo);"></i>
+        <h3>No issues reported this period</h3>
+        <p>No maintenance requests were submitted during the selected {{ period_label|lower }} period.</p>
+    </div>
+</div>
+{% else %}
+
+<!-- ── Section 1: Priority maintenance zones ─────────────────── -->
+<div style="margin-bottom:8px;font-family:var(--font-display);font-size:11px;
+            text-transform:uppercase;letter-spacing:.8px;color:var(--t-muted);">
+    Priority maintenance zones
+</div>
+
+<div class="alert alert-info no-print" style="margin-bottom:18px;">
+    <i class="ti ti-info-circle"></i>
+    Zones are ranked by number of reports in the period.
+    <strong>Critical</strong> = 5 or more reports &nbsp;·&nbsp;
+    <strong>High</strong> = 3–4 reports &nbsp;·&nbsp;
+    <strong>Monitor</strong> = 1–2 reports.
+</div>
+
+{% for rec in recommendations %}
+<div class="rec-card">
+    <div class="rec-header">
+        <div>
+            <div class="rec-location">
+                <i class="ti {{ rec.icon }}" style="color:var(--accent);margin-right:6px;"></i>
+                {{ rec.hostel }} — Wing {{ rec.wing }}
+            </div>
+            <div class="rec-sub">
+                {{ rec.category }} &nbsp;·&nbsp; {{ rec.count }} report{{ rec.count|pluralize }} this period
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+            <span class="badge {{ rec.urgency_cls }}" style="font-size:12px;">{{ rec.urgency }}</span>
+            <span style="font-size:12px;color:var(--t-muted);">{{ rec.note }}</span>
+        </div>
+    </div>
+
+    <div style="background:var(--bg-base);border-radius:var(--r-sm);padding:14px 16px;">
+        <div style="font-size:12px;font-weight:600;color:var(--t-muted);text-transform:uppercase;
+                    letter-spacing:.6px;margin-bottom:10px;">
+            Recommended action: {{ rec.action }}
+        </div>
+        <ul class="step-list">
+            {% for step in rec.steps %}
+            <li>{{ step }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endfor %}
+
+<!-- ── Section 2: Hostel totals ──────────────────────────────── -->
+{% if hostel_totals %}
+<div style="margin:28px 0 8px;font-family:var(--font-display);font-size:11px;
+            text-transform:uppercase;letter-spacing:.8px;color:var(--t-muted);">
+    Issue volume by hostel
+</div>
+<div class="card">
+    {% for row in hostel_totals %}
+    <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;">
+            <span style="font-weight:500;">{{ row.hostel_name }}</span>
+            <span style="color:var(--t-secondary);">{{ row.count }} report{{ row.count|pluralize }}</span>
+        </div>
+        <div style="height:7px;background:var(--bg-base);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;border-radius:4px;background:var(--accent);
+                        width:{% widthratio row.count hostel_totals.0.count 100 %}%;"></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── Section 3: Category-level advice ─────────────────────── -->
+{% if category_advice %}
+<div style="margin:28px 0 8px;font-family:var(--font-display);font-size:11px;
+            text-transform:uppercase;letter-spacing:.8px;color:var(--t-muted);">
+    Maintenance guidance by issue type
+</div>
+{% for item in category_advice %}
+<div class="cat-advice-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:36px;height:36px;border-radius:9px;background:var(--accent-lt);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti {{ item.icon }}" style="font-size:18px;color:var(--accent);"></i>
+        </div>
+        <div>
+            <div style="font-family:var(--font-display);font-size:14px;font-weight:600;
+                        color:var(--t-primary);">{{ item.category }}</div>
+            <div style="font-size:12.5px;color:var(--t-secondary);">
+                {{ item.count }} report{{ item.count|pluralize }} this period &nbsp;·&nbsp; {{ item.action }}
+            </div>
+        </div>
+    </div>
+    <ul class="step-list">
+        {% for step in item.steps %}
+        <li>{{ step }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- ── Section 4: Recommendations summary table ─────────────── -->
+<div style="margin:28px 0 8px;font-family:var(--font-display);font-size:11px;
+            text-transform:uppercase;letter-spacing:.8px;color:var(--t-muted);">
+    Quick-reference summary
+</div>
+<div class="table-wrap">
+    <table class="dt">
+        <thead>
+            <tr>
+                <th>Hostel</th>
+                <th>Wing</th>
+                <th>Issue type</th>
+                <th>Reports</th>
+                <th>Urgency</th>
+                <th>Action required</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in recommendations %}
+            <tr>
+                <td class="fw-500">{{ rec.hostel }}</td>
+                <td>Wing {{ rec.wing }}</td>
+                <td>{{ rec.category }}</td>
+                <td>{{ rec.count }}</td>
+                <td><span class="badge {{ rec.urgency_cls }}">{{ rec.urgency }}</span></td>
+                <td class="text-sm" style="color:var(--t-secondary);">{{ rec.action }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endif %}
+{% endblock %}

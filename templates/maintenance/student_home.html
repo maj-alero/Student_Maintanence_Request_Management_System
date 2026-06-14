@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Welcome back, {{ user.get_full_name|default:user.username }}</h1>
+    <p>Here's a summary of your maintenance requests.</p>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total submitted</div>
+        <div class="stat-value">{{ total }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" style="color:var(--pend);">{{ pending }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">In progress</div>
+        <div class="stat-value" style="color:var(--prog);">{{ in_progress }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" style="color:var(--lo);">{{ resolved }}</div>
+    </div>
+</div>
+
+<!-- Quick actions -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">
+    <a href="{% url 'submit_request' %}" class="card"
+       style="text-decoration:none;display:flex;align-items:center;gap:16px;
+              border:2px solid var(--accent);transition:box-shadow var(--ease);"
+       onmouseover="this.style.boxShadow='0 4px 20px rgba(79,70,229,.18)'"
+       onmouseout="this.style.boxShadow=''">
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--accent);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti ti-plus" style="font-size:22px;color:#fff;"></i>
+        </div>
+        <div>
+            <div style="font-family:var(--font-display);font-size:15px;font-weight:600;
+                        color:var(--t-primary);margin-bottom:2px;">New request</div>
+            <div style="font-size:13px;color:var(--t-secondary);">
+                Report a hostel maintenance issue
+            </div>
+        </div>
+    </a>
+    <a href="{% url 'student_dashboard' %}" class="card"
+       style="text-decoration:none;display:flex;align-items:center;gap:16px;
+              transition:box-shadow var(--ease);"
+       onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.08)'"
+       onmouseout="this.style.boxShadow=''">
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--bg-surface2);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti ti-list" style="font-size:22px;color:var(--accent);"></i>
+        </div>
+        <div>
+            <div style="font-family:var(--font-display);font-size:15px;font-weight:600;
+                        color:var(--t-primary);margin-bottom:2px;">My requests</div>
+            <div style="font-size:13px;color:var(--t-secondary);">
+                View and track all your requests
+            </div>
+        </div>
+    </a>
+</div>
+
+<!-- Recent activity -->
+<div class="card">
+    <div class="card-title" style="justify-content:space-between;">
+        <span><i class="ti ti-history" style="color:var(--accent);"></i> Recent activity</span>
+        {% if total %}
+        <a href="{% url 'student_dashboard' %}" class="btn btn-outline btn-sm">View all</a>
+        {% endif %}
+    </div>
+
+    {% if recent %}
+    <div class="table-wrap" style="border:none;">
+        <table class="dt">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Category</th>
+                    <th>Hostel / Room</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in recent %}
+                <tr>
+                    <td class="text-muted text-xs">{{ req.id }}</td>
+                    <td class="fw-500">{{ req.category }}</td>
+                    <td class="text-sm">
+                        {{ req.hostel_name }}<br>
+                        <span class="text-muted text-xs">Wing {{ req.wing }}, Rm {{ req.room_number }}</span>
+                    </td>
+                    <td>
+                        {% if req.priority %}
+                            {% if req.priority.priority_label == 'High' %}<span class="badge badge-high">High</span>
+                            {% elif req.priority.priority_label == 'Medium' %}<span class="badge badge-medium">Medium</span>
+                            {% else %}<span class="badge badge-low">Low</span>{% endif %}
+                        {% else %}<span class="text-muted text-xs">—</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if req.status == 'Pending' %}<span class="badge badge-pending">Pending</span>
+                        {% elif req.status == 'In Progress' %}<span class="badge badge-inprogress">In Progress</span>
+                        {% else %}<span class="badge badge-resolved">Resolved</span>{% endif %}
+                    </td>
+                    <td class="text-xs text-muted">{{ req.timestamp|date:"d M Y" }}</td>
+                    <td><a href="{% url 'request_detail' req.pk %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px 24px;">
+        <i class="ti ti-clipboard-off"></i>
+        <h3>No requests yet</h3>
+        <p>You haven't submitted any maintenance requests.</p>
+        <a href="{% url 'submit_request' %}" class="btn btn-primary" style="margin-top:14px;">
+            <i class="ti ti-plus"></i> Submit your first request
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

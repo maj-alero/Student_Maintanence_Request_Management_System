@@ -152,6 +152,23 @@ class StatusHistory(models.Model):
 
 
 
+class StaffFeedback(models.Model):
+    request = models.ForeignKey(
+        MaintenanceRequest, on_delete=models.CASCADE, related_name='feedback'
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='sent_feedback'
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Feedback on Request #{self.request.id} by {self.author}"
+
+
 class Notification(models.Model):
     recipient = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='notifications'
